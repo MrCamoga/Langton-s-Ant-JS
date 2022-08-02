@@ -1,10 +1,5 @@
 function getDirs(rule) {
-	newdir = [];
-	while(rule != 0) {
-	newdir.push((rule&1)==0 ? 1:3);
-	rule = rule >> 1;
-	}
-	return newdir;
+	return return rule.toString(2).split("").map(e=>[1,3][e]).reverse();
 }
 
 function simulateAnt(rule) {
@@ -12,8 +7,8 @@ function simulateAnt(rule) {
 	var height = 800;
 	var map = new Array(width*height).fill(0);
 
-	var x = 400;
-	var y = 400;
+	var x = width/2;
+	var y = height/2;
 	var dir = 0;
 	var newdir = getDirs(rule);
 	var size = newdir.length;
