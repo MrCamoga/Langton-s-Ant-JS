@@ -1,6 +1,3 @@
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-
 function getDirs(rule) {
 	newdir = [];
 	while(rule != 0) {
@@ -46,6 +43,9 @@ function simulateAnt(rule) {
 }
 
 function render(map,colors,width,height) {
+	var canvas = document.getElementById('canvas');
+	var ctx = canvas.getContext('2d');
+
 	var img = ctx.createImageData(width,height);
 	var data = img.data;
 
