@@ -7,6 +7,8 @@ var Screen = (function() {
 	return {
 		init: function() {
 			canvas = document.getElementById('antcanvas');
+			canvas.width = width;
+			canvas.height = height;
 			ctx = canvas.getContext('2d');
 			img = ctx.createImageData(width,height);
 			data = img.data;
@@ -24,25 +26,46 @@ var Screen = (function() {
 			}
 			ctx.putImageData(img,0,0);
 			var endTime = performance.now();
-			renderTime += (endTime-startTime)/1000;		
+			renderTime += (endTime-startTime)/1000;
+			document.getElementById('rendertime').innerHTML=(endTime-startTime).toFixed(3)+" ms";	
+			document.getElementById('iterations').innerHTML=Ant.getIterations().toLocaleString()+" iterations";
+			document.getElementById('itps').innerHTML=Ant.getItps().toLocaleString()+" iterations/s";	
 		},
 		getRenderTime: function() { return renderTime; },
 		getFrameTime: function() { return renderTime/frames; }
 	}
 })();
 
+var Settings = (function() {
+	return {
+		getItpf: function() {
+			var value = document.getElementById("itpf").value;
+			var itpf = Math.exp(value/100*Math.log(10000000));
+			return Math.floor(itpf);
+		},
+		drawFog: function() { return document.getElementById("fog").checked; },
+		renderType: function() { return document.getElementById("rendertype").value; },
+		sliceDepth: function() { return parseInt(document.getElementById("slice").value); },
+		sliceSize: function() { return parseInt(document.getElementById("slicesize").value); }
+	}
+})();
+
 var Ant = (function() {
 	var x, y, dir, index, state;
-	const directionx =[0,1,0,-1], directiony = [-1,0,1,0];
+	const directionx =[0,1,0,-1], directiony = [-1,0,1,0], directioni = [-width,1,width,-1];
 	var map;
 	var colors;
-	var newdir;
-	var ruleString, size;
+	var turn;
+	var _rule, ruleString, size;
 	var iterations;
 	var time;
 	
 	function getDirs(rule) {
-		return rule.toString(2).split("").map(e=>[1,3][e]).reverse();
+		return rule.toString(2).split("").map(e=>[3,1][e]).reverse();
+	}
+
+	function genColors() {
+		colors = new Array(size).fill(0).map(x=>(new Array(3).fill(0).map(y=>Math.floor(Math.random()*256))));
 	}
 
 	return {
@@ -52,36 +75,38 @@ var Ant = (function() {
 			y = height/2;
 			map = new Array(width*height).fill(0);
 			dir = 0;
-			newdir = getDirs(rule);
-			ruleString = rule.toString(2).split("").map(e=>"RL"[e]).reverse().join("");
-			size = newdir.length;
-			colors = new Array(size).fill(0).map(x=>(new Array(3).fill(0).map(y=>Math.floor(Math.random()*256))));
+			turn = getDirs(rule);
+			_rule = rule;
+			ruleString = turn.map(e=>" R L"[e]).join("");
+			document.getElementById("rulestring").innerHTML = ruleString + " (" + rule + ")";
+			size = turn.length;
+			genColors();
 			index = x+y*width;	
 			iterations = 0, time = 0;	
 		},
 		simulateAnt: function() {
 			var stop = false;
 			var startTime = performance.now();
-			for(var i = 0; i < 5000000; i+=2) {
+			for(var i = 0, max = Settings.getItpf(); i < max; i+=2) {
 				// HORIZONTAL MOVEMENT
 				state = map[index];
-				dir = (dir+newdir[state])&3;
+				dir = (dir+turn[state])&3;
 				map[index]++;
 				if(map[index]==size) map[index] = 0;
 				x += directionx[dir];
-				index += directionx[dir];
-				if(x<0 || x >= width) {
+				index += directioni[dir];
+				if(x < 0 || x >= width) {
 					i++;
 					stop = true;
 					break;
 				}
 				// VERTICAL MOVEMENT		
 		                state = map[index];
-		                dir = (dir+newdir[state])&3;
+		                dir = (dir+turn[state])&3;
 		                map[index]++;
 		                if(map[index]==size) map[index] = 0;
 		                y += directiony[dir];
-		                index += directiony[dir]*width;
+		                index += directioni[dir];
 				if(y < 0 || y >= height) {
 					i+=2;
 					stop = true;
@@ -98,7 +123,8 @@ var Ant = (function() {
 		getIterations: function() { return iterations; },
 		getTime: function() { return time; },
 		getItps: function() { return iterations/time; },
-		getRule: function() { return ruleString; }
+		getRule: function() { return _rule; },
+		changeColor: function() { genColors(); }
 	}
 })();
 
@@ -114,5 +140,10 @@ function init(rule) {
 
 function loop(time) {
 	if(Ant.simulateAnt()) frameid = window.requestAnimationFrame(loop);
+	Screen.render();
+}
+
+function changeColor() {
+	Ant.changeColor();
 	Screen.render();
 }
