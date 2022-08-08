@@ -1,5 +1,6 @@
 var width = 300, height = 300, depth = 300;
 var mul = [1,width,width*height];
+var PERIODBUFFERSIZE = 1000000;
 
 var Screen = (function() {
 	var canvas, ctx, img, data;
@@ -92,12 +93,13 @@ var Ant = (function() {
 			22,23,19,18,21,20,16,17,13,12,15,14,5,4,3,2,1,0,11,10,9,8,7,6,0,0,0,0,0,0,0,0,
 			23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,0,0,0,0,0,0,0,0];
 
-	var map;
+	var map = new Array(width*height*depth);
 	var colors;
 	var turn;
 	var _rule, ruleString, size;
 	var iterations;
 	var time;
+	var states = new Array(PERIODBUFFERSIZE);
 	
 	function getDirs(rule) {
 		return rule.toString(4).split("").map(e=>[13,10,17,22][e]).reverse();
@@ -112,7 +114,7 @@ var Ant = (function() {
 			x = width/2;
 			y = height/2;
 			z = depth/2;
-			map = new Array(width*height*depth).fill("0");
+			map.fill("0");
 			dir = Math.floor(Math.random()*24);
 			turn = getDirs(rule);
 			_rule = rule;
@@ -126,10 +128,10 @@ var Ant = (function() {
 		simulateAnt: function() {
 			var stop = false;
 			var startTime = performance.now();
-			for(var i = 0, max = Settings.getItpf(); i < max; i++) {
-		                state = map[index];
-				dir = transform[(turn[state]<<5)|dir];
+			for(var max = iterations + Settings.getItpf(); iterations < max; iterations++) {
+				dir = transform[(turn[map[index]]<<5)|dir];
 		                if(++map[index]==size) map[index] = 0;
+				states[iterations%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
 				x += directionx[dir];
 		                y += directiony[dir];
 				z += directionz[dir];
@@ -139,7 +141,6 @@ var Ant = (function() {
 					break;
 				}
 			}
-			iterations += i;
 			var endTime = performance.now();
 			time += (endTime-startTime)/1000;
 			return !stop;	
@@ -151,9 +152,29 @@ var Ant = (function() {
 		getItps: function() { return iterations/time; },
 		getRule: function() { return _rule; },
 		getRuleString: function() { return ruleString; },
-		changeColor: function() { genColors(); }
+		changeColor: function() { genColors(); },
+		getStates: function() { return states; },
+		getPeriodSize: function(v) { var x=0,y=0,z=0; v.forEach(e=>{x+=directionx[e&255];y+=directiony[e&255];z+=directionz[e&255];}); return [x,y,z];}
 	}
 })();
+
+function getPeriod(a) {
+	var period = [a[0]];
+	var p = 1;
+	var m = 0;
+	var maxperiod = a.length/1.1;
+    	while(m <= 1.1*p && a.length > 0) {
+		if(p > maxperiod) return -1;
+		if(period[m%p]==a[m+p]) m++;
+		else {
+			period.push(a[p]);
+			p++;
+			m = 0;
+    		}
+	}
+	var d = Ant.getPeriodSize(period);
+	return [p,d];
+}
 
 frameid = 0;
 
@@ -168,7 +189,12 @@ function init(rule) {
 forwards = true
 
 function loop(time) {
-	if(Ant.simulateAnt()) frameid = window.requestAnimationFrame(loop);
+	if(Ant.simulateAnt()) {
+		frameid = window.requestAnimationFrame(loop);
+	} else {
+		var v = Ant.getStates().slice(Ant.getIterations()%PERIODBUFFERSIZE+1).concat(Ant.getStates().slice(0,Ant.getIterations()%PERIODBUFFERSIZE+1)).reverse();
+		console.log(getPeriod(v));
+	}
 	Screen.render();
 }
 
