@@ -1,5 +1,5 @@
-var width = 4000, height = 4000;
-var PERIODBUFFERSIZE = 10000000;
+var width = 1000, height = 1000;
+var PERIODBUFFERSIZE = 1000000;
 
 var Screen = (function() {
 	var canvas, ctx, img, data;
@@ -19,11 +19,12 @@ var Screen = (function() {
 		render: function () {
 			frames++;
 			var startTime = performance.now();
-			for(var i = 0,j=0; i < width*height*4; j++) {
-				data[i++] = Ant.getColors(Ant.getMap(j))[0];
-				data[i++] = Ant.getColors(Ant.getMap(j))[1];
-				data[i++] = Ant.getColors(Ant.getMap(j))[2];
-				data[i++] = 255;
+			for(var i = 0,j=0,len=width*height*4; i < len; j++) {
+				var state = Ant.getCell(j);
+				data[i++] = Ant.getColors(state)[0];
+				data[i++] = Ant.getColors(state)[1];
+				data[i++] = Ant.getColors(state)[2];
+				data[i++] = (state!=="0")*255;
 			}
 			ctx.putImageData(img,0,0);
 			var endTime = performance.now();
@@ -33,7 +34,9 @@ var Screen = (function() {
 			document.getElementById('itps').innerHTML=Ant.getItps().toLocaleString()+" iterations/s";	
 		},
 		getRenderTime: function() { return renderTime; },
-		getFrameTime: function() { return renderTime/frames; }
+		getFrameTime: function() { return renderTime/frames; },
+		getContext: function() { return ctx; },
+		getRaster: function() { return data; }
 	}
 })();
 
@@ -75,7 +78,7 @@ var Ant = (function() {
 			// have variable rule in main function
 			x = width/2;
 			y = height/2;
-			map.fill(0);
+			map.fill("0");
 			dir = 0;
 			turn = getDirs(rule);
 			_rule = rule;
@@ -117,7 +120,8 @@ var Ant = (function() {
 			return !stop;	
 		},
 		getColors: function(i) { return colors[i]; },
-		getMap: function(i) { return map[i]; },
+		getMap: function(i) { return map; },
+		getCell: function(i) { return map[i]; },
 		getIterations: function() { return iterations; },
 		getTime: function() { return time; },
 		getItps: function() { return iterations/time; },
@@ -133,13 +137,12 @@ function getPeriod(a) {
 	var p = 1;
 	var m = 0;
 	var maxperiod = a.length/1.1;
-    	while(m <= 1.1*p && a.length > 0) {
-		if(p > maxperiod) return -1;
-		if(period[m%p]==a[m+p]) m++;
+    	while(m <= 1.1*p || m < 200) {
+		if(p > maxperiod || m > a.length) return -1;
+		if(period[m%p]==a[m]) m++;
 		else {
 			period.push(a[p]);
-			p++;
-			m = 0;
+			m = p++;
     		}
 	}
 	var d = Ant.getPeriodSize(period);
@@ -151,7 +154,11 @@ frameid = 0;
 function init(rule) {
 	window.cancelAnimationFrame(frameid);
 	Screen.init();
+
 	Ant.init(rule);
+	
+	document.getElementById("period").innerHTML = "";
+	document.getElementById("highwaysize").innerHTML = "";
 	
 	loop(0);
 }
@@ -161,7 +168,13 @@ function loop(time) {
 		frameid = window.requestAnimationFrame(loop);
 	} else {
 		var v = Ant.getStates().slice(Ant.getIterations()%PERIODBUFFERSIZE).concat(Ant.getStates().slice(0,Ant.getIterations()%PERIODBUFFERSIZE)).reverse();
-		console.log(getPeriod(v));
+		document.getElementById("period").innerHTML = "Finding period...";
+		var p = getPeriod(v);
+		if(p==-1) document.getElementById("period").innerHTML = "Period not found";
+		else {
+			document.getElementById("period").innerHTML = "Period: " + p[0];
+			document.getElementById("highwaysize").innerHTML = "Highway size: " + p[1].map(x=>Math.abs(x)).join("x");		
+		}
 	}
 	Screen.render();
 }

@@ -45,7 +45,9 @@ var Screen = (function() {
 			document.getElementById('itps').innerHTML=Ant.getItps().toLocaleString()+" iterations/s";
 		},
 		getRenderTime: function() { return renderTime; },
-		getFrameTime: function() { return renderTime/frames; }
+		getFrameTime: function() { return renderTime/frames; },
+		getContext: function() { return ctx; },
+		getRaster: function() { return data; }
 	}
 })();
 
@@ -139,13 +141,12 @@ function getPeriod(a) {
 	var p = 1;
 	var m = 0;
 	var maxperiod = a.length/1.1;
-    	while((m <= 1.1*p || m < 200) && a.length > 0) {
-		if(p > maxperiod) return -1;
-		if(period[m%p]==a[m+p]) m++;
+    	while(m <= 1.1*p || m < 200) {
+		if(p > maxperiod || m > a.length) return -1;
+		if(period[m%p]==a[m]) m++;
 		else {
 			period.push(a[p]);
-			p++;
-			m = 0;
+			m = p++;
     		}
 	}
 	var d = Ant.getPeriodSize(period);
@@ -159,6 +160,9 @@ function init(rule) {
 	Screen.init();
 	Ant.init(rule);
 	
+	document.getElementById("period").innerHTML = "";
+	document.getElementById("highwaysize").innerHTML = "";
+	
 	loop(0);
 }
 
@@ -169,7 +173,13 @@ function loop(time) {
 		frameid = window.requestAnimationFrame(loop);
 	} else {
 		var v = Ant.getStates().slice(Ant.getIterations()%PERIODBUFFERSIZE).concat(Ant.getStates().slice(0,Ant.getIterations()%PERIODBUFFERSIZE)).reverse();
-		console.log(getPeriod(v));
+		document.getElementById("period").innerHTML = "Finding period...";
+		var p = getPeriod(v);
+		if(p==-1) document.getElementById("period").innerHTML = "Period not found";
+		else {
+			document.getElementById("period").innerHTML = "Period: " + p[0];
+			document.getElementById("highwaysize").innerHTML = "Highway size: " + p[1].map(x=>Math.abs(x)).join("x");		
+		}
 	}
 	Screen.render();
 }

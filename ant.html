@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<script src="ant.js"></script>
+		<script type="text/javascript" src="ant.js"></script>
 		<title>2D Langton's Ant</title>
 		<script>
 			function downloadImage() {
@@ -19,6 +19,8 @@
 		<p id="iterations"></p>
 		<p id="itps"></p>
 		<p id="rendertime"></p>
+		<p id="period"></p>
+		<p id="highwaysize"></p>
 		<label for="itpf">Iterations per frame</label>
 		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
 		<label id="itpflabel"></label><br>
