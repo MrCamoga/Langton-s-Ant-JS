@@ -1,2 +1,2 @@
 # Langton-s-Ant-JS
-Fast 2D and 3D Langton's Ant implementations written in JS
+2D, hexagonal, 3D and 4D Langton's Ant fast implementations written in JS
