@@ -34,7 +34,7 @@ var Screen = (function() {
 			var min = sliceDepth, max = Math.min(sliceDepth+sliceSize,size[2]);
 			var w = Settings.wCoord()*mul[3];
 			ctx.clearRect(0,0,size[0]*scale,size[1]*scale);
-			ctx.beginPath(); ctx.rect(0,0,size[0]*scale,size[1]*scale); ctx.stroke();
+			//ctx.beginPath(); ctx.rect(0,0,size[0]*scale,size[1]*scale); ctx.stroke();
 			for(var i = 0,j=0,len=mul[2]*4; i < len;j++) {
 				var k=min, state=0, transparent=true;
 				for(var cell=j+k*mul[2]+w; k < max; k++, cell += mul[2]) {
@@ -64,22 +64,8 @@ var Screen = (function() {
 	}
 })();
 
-var Settings = (function() {
-	return {
-		getItpf: function() {
-			var value = document.getElementById("itpf").value;
-			var itpf = Math.exp(value/100*Math.log(10000000));
-			return Math.floor(itpf);
-		},
-		drawFog: function() { return document.getElementById("fog").checked; },
-		sliceDepth: function() { return parseInt(document.getElementById("slice").value); },
-		sliceSize: function() { return parseInt(document.getElementById("slicesize").value); },
-		wCoord: function() { return parseInt(document.getElementById("wcoord").value);}
-	}
-})();
-
 var Ant = (function() {
-	var w, x, y, z, dir, index, state;
+	var w, x, y, z, dir, index;
 	const	directionx = [1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,-1,0,-1,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,0,-1,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,0,-1,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,0,-1,0,0,0,-1], 
 		directiony = [0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,0,-1,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,0,-1,0,0,0,-1,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,-1,0,0,0,-1,0,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,-1,0,0,0,0,-1,0,0,0,-1,0,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,-1,0,0], 
 		directionz = [0,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,-1,0,-1,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,-1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,-1,0,0,0,-1,0,0,0,0,-1,0,-1,0,0,0,0,0,0,-1,-1,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,-1,0,0,0,0,0,0,-1,-1,0,0,0,0,-1,0,0,0,-1,0,0,0,0,-1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,-1,0,0,0,0,-1,0,0,0,-1,0,0,0,0,-1,-1,0,0,0,0,0,0,-1,0],
@@ -348,56 +334,3 @@ var Ant = (function() {
 		getPeriodSize: function(v) { var x=0,y=0,z=0,w=0; v.forEach(e=>{x+=directionx[e&255];y+=directiony[e&255];z+=directionz[e&255];w+=directionw[e&255];}); return [x,y,z,w];}
 	}
 })();
-
-function getPeriod(a) {
-	var period = [a[0]];
-	var p = 1;
-	var m = 0;
-	var maxperiod = a.length/1.1;
-    	while(m <= 1.1*p || m < 200) {
-		if(p > maxperiod || m > a.length) return -1;
-		if(period[m%p]==a[m]) m++;
-		else {
-			period.push(a[p]);
-			m = p++;
-    		}
-	}
-	var d = Ant.getPeriodSize(period);
-	return [p,d];
-}
-
-frameid = 0;
-
-function init(rule) {
-	window.cancelAnimationFrame(frameid);
-	Screen.init();
-	Ant.init(rule);
-	
-	document.getElementById("period").innerHTML = "";
-	document.getElementById("highwaysize").innerHTML = "";
-
-	loop(0);
-}
-
-forwards = true
-
-function loop(time) {
-	if(Ant.simulateAnt()) {
-		frameid = window.requestAnimationFrame(loop);
-	} else {
-		var v = Ant.getStates().slice(Ant.getIterations()%PERIODBUFFERSIZE).concat(Ant.getStates().slice(0,Ant.getIterations()%PERIODBUFFERSIZE)).reverse();
-		document.getElementById("period").innerHTML = "Finding period...";
-		var p = getPeriod(v);
-		if(p==-1) document.getElementById("period").innerHTML = "Period not found";
-		else {
-			document.getElementById("period").innerHTML = "Period: " + p[0];
-			document.getElementById("highwaysize").innerHTML = "Highway size: " + p[1].map(x=>Math.abs(x)).join("x");		
-		}
-	}
-	Screen.render();
-}
-
-function changeColor() {
-	Ant.changeColor();
-	Screen.render();
-}

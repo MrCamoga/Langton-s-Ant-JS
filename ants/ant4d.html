@@ -1,19 +1,13 @@
 <html>
 	<head>
+		<script type="text/javascript" src="common.js"></script>
 		<script src="ant4d.js"></script>
 		<title>4D Langton's Ant</title>
-		<script>
-			function downloadImage() {
-				var link = document.getElementById("download");
-				link.download = Ant.getRule().toString();
-				link.href = document.getElementById("antcanvas").toDataURL();
-			}
-		</script>
 	</head>
 	
 	<body>
 		<label for="rulenumber">Rule:</label>
-	        <input type="number" id="rulenumber" value="358103">
+	        <input type="number" id="rulenumber" value="45903">
 	        <button onclick="init(BigInt(document.getElementById('rulenumber').value))">Run</button>
 	        <button onclick="init(BigInt(parseInt(Math.random()*10000000000)))">Random rule</button>
 		<p id="rulestring"></p>
@@ -26,7 +20,7 @@
 		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
 		<label id="itpflabel"></label><br>
 		<label for="fog">Draw depth fog</label>
-		<input type="checkbox" id="fog" onclick="Screen.render()"><br>
+		<input type="checkbox" id="fog" checked="1" onclick="Screen.render()"><br>
 	
 		<label for="slice">Z axis slice</label>
 		<input type="range" oninput="document.getElementById('slicelabel').innerHTML = Settings.sliceDepth(); Screen.render()" id="slice" value="0" min="0" max="69">

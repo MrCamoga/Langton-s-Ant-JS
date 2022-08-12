@@ -1,14 +1,8 @@
 <html>
 	<head>
+		<script type="text/javascript" src="common.js"></script>
 		<script type="text/javascript" src="ant.js"></script>
 		<title>2D Langton's Ant</title>
-		<script>
-			function downloadImage() {
-				var link = document.getElementById("download");
-				link.download = Ant.getRule().toString();
-				link.href = document.getElementById("antcanvas").toDataURL();
-			}
-		</script>
 	</head>
 	<body>
 		<label for="rule">Rule:</label>
