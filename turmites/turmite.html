@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<script src="../common.js"></script>
+		<script src="turmite.js"></script>
+		<script src="gentable.js"></script>
+		<link rel="stylesheet" href="style.css">
+		<title>2D Turmite</title>
+		<script>
+			function downloadImage() {
+				var link = document.getElementById("download");
+				link.download = Ant.getRule().toString();
+				link.href = document.getElementById("antcanvas").toDataURL();
+			}
+		</script>
+	</head>
+	<body>
+		<p id="rulestring"></p>
+		<p id="iterations"></p>
+		<p id="itps"></p>
+		<p id="rendertime"></p>
+		<p id="period"></p>
+		<p id="highwaysize"></p>
+		<label for="ruletablestates">Number of states: </label>
+		<input id="ruletablestates" type="number" onclick="generateRuleTable();" value="2" min="1" max="256"><br>
+		<label for="ruletablecolors">Number of colors: </label>
+		<input id="ruletablecolors" type="number" oninput="generateRuleTable();" value="2" min="1" max="256"><br>
+		<table>
+			<tbody id="ruletable">
+				<tr>
+					<th rowspan="2" colspan="2">State transition table</th>
+					<th colspan="6">Color</th>
+				</tr>
+				<tr>
+					<th colspan="3">0</th>
+					<th colspan="3">1</th>
+				</tr>
+				<tr>
+					<th rowspan="2">State</th>
+					<th>0</th>
+					<td><input type="text" value="1"></td>
+					<td><input type="text" value="1"></td>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="1"></td>
+					<td><input type="text" value="1"></td>
+					<td><input type="text" value="1"></td>
+				</tr>
+				<tr>
+					<th>1</th>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="0"></td>
+					<td><input type="text" value="1"></td>
+				</tr>
+			</tbody>
+		</table>
+		<input type="button" onclick="init(readRuleTable());" value="Run turmite">
+		<input type="button" onclick="genRandomRule(4); init(readRuleTable());" value="Randomize"><br>
+		<label for="itpf">Iterations per frame</label>
+		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
+		<label id="itpflabel"></label><br>
+
+		<button type="button" onclick="changeColor()">Change Color</button><br>
+
+		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>
+
+		<canvas style="image-rendering: pixelated" id="antcanvas" width="1000" height="1000"></canvas>
+	</body>
+</html>

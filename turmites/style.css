@@ -1,0 +1,19 @@
+body {
+        margin: 0;
+        border: 0;
+        padding: 0;
+}
+
+#ruletable, th, td {
+	border: 1px solid black;
+}
+
+#ruletable input {
+	width: 40;
+	text-align: center;
+}
+
+canvas,
+img {
+    image-rendering: pixelated;
+}
