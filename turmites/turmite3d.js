@@ -115,16 +115,15 @@ var Ant = (function() {
 		simulateAnt: function() {
 			var stop = false;
 			var startTime = performance.now();
-			for(var max = iterations + Settings.getItpf(); iterations < max; iterations++) {
+			for(var max = iterations + Settings.getItpf(); iterations < max;) {
 				var r = turn[state][map[index]];
-				states[iterations%PERIODBUFFERSIZE] = ((state = r[2])<<16) | ((map[index] = r[0])<<8) | (dir = transform[(r[1]<<5)|dir]); // limited to 256 colors and states
+				states[iterations++%PERIODBUFFERSIZE] = ((state = r[2])<<16) | ((map[index] = r[0])<<8) | (dir = transform[(r[1]<<5)|dir]); // limited to 256 colors and states
 				x += directionx[dir];
 		                y += directiony[dir];
 				z += directionz[dir];
 		                index += directioni[dir];
 				if(x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth) {
 					stop = true;
-					iterations++;
 					break;
 				}
 			}

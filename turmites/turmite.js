@@ -81,15 +81,14 @@ var Ant = (function() {
 		simulateAnt: function() {
 			var stop = false;
 			var startTime = performance.now();
-			for(var max = iterations + Settings.getItpf(); iterations < max; iterations++) {
+			for(var max = iterations + Settings.getItpf(); iterations < max;) {
 				var r = turn[state][map[index]];
-				states[iterations%PERIODBUFFERSIZE] = ((state = r[2])<<16) | ((map[index] = r[0])<<8) | (dir = (dir+r[1])&3);
+				states[iterations++%PERIODBUFFERSIZE] = ((state = r[2])<<16) | ((map[index] = r[0])<<8) | (dir = (dir+r[1])&3);
 				x += directionx[dir];
 				y += directiony[dir];
 		                index += directioni[dir];
 				if(x < 0 ||y < 0 || x >= width || y >= height) {
 					stop = true;
-					iterations++;
 					break;
 				}
 			}
