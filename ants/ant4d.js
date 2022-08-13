@@ -329,7 +329,7 @@ var Ant = (function() {
 		getItps: function() { return iterations/time; },
 		getRule: function() { return _rule; },
 		getRuleString: function() { return ruleString; },
-		changeColor: function() { genColors(); },
+		recolor: function() { genColors(); },
 		getStates: function() { return states; },
 		getPeriodSize: function(v) { var x=0,y=0,z=0,w=0; v.forEach(e=>{x+=directionx[e&255];y+=directiony[e&255];z+=directionz[e&255];w+=directionw[e&255];}); return [x,y,z,w];}
 	}
