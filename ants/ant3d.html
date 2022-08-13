@@ -29,6 +29,10 @@
 		<label for="slicesize">Slice depth</label>
 		<input type="range" oninput="document.getElementById('slicesizelabel').innerHTML = Settings.sliceSize(); Screen.render()" id="slicesize" value="300" min="1" max="300">
 		<label id="slicesizelabel"></label><br>
+
+		<label for="rotation">Rotate</label>
+		<input type="range" oninput="document.getElementById('rotationlabel').innerHTML = Settings.rotationAngle().toFixed(2) + ' rad'; Screen.render()" id="rotation" value="0" min="-180" max="180">
+		<label id="rotationlabel"></label><br>
 	
 		<button type="button" onclick="changeColor()">Change Color</button><br>
 		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>

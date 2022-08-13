@@ -8,7 +8,8 @@ var Settings = (function() {
 		drawFog: function() { return document.getElementById("fog").checked; },
 		sliceDepth: function() { return parseInt(document.getElementById("slice").value); },
 		sliceSize: function() { return parseInt(document.getElementById("slicesize").value); },
-		wCoord: function() { return parseInt(document.getElementById("wcoord").value);}
+		wCoord: function() { return parseInt(document.getElementById("wcoord").value);},
+		rotationAngle: function() { return parseInt(document.getElementById("rotation").value)*Math.PI/180}
 	}
 })();
 
