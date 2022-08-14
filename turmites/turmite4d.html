@@ -1,11 +1,12 @@
 <html>
 	<head>
 		<script src="../common.js"></script>
-		<script src="turmite.js"></script>
-		<script src="gentable.js"></script>
+		<script src="turmite4d.js"></script>
+		<script type="text/javascript" src="gentable.js"></script>
 		<link rel="stylesheet" href="style.css">
-		<title>2D Turmite</title>
+		<title>4D Turmite</title>
 	</head>
+	
 	<body>
 		<p id="rulestring"></p>
 		<p id="iterations"></p>
@@ -49,15 +50,27 @@
 			</tbody>
 		</table>
 		<input type="button" onclick="init(readRuleTable());" value="Run turmite">
-		<input type="button" onclick="genRandomRule(4); init(readRuleTable());" value="Randomize"><br>
+		<input type="button" onclick="genRandomRule(192); init(readRuleTable());" value="Randomize"><br>
 		<label for="itpf">Iterations per frame</label>
 		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
 		<label id="itpflabel"></label><br>
-
+		<label for="fog">Draw depth fog</label>
+		<input type="checkbox" id="fog" checked="1" onclick="Screen.render()"><br>
+	
+		<label for="slice">Slice</label>
+		<input type="range" oninput="document.getElementById('slicelabel').innerHTML = Settings.sliceDepth(); Screen.render()" id="slice" value="0" min="0" max="69">
+		<label id="slicelabel"></label><br>
+	
+		<label for="slicesize">Slice depth</label>
+		<input type="range" oninput="document.getElementById('slicesizelabel').innerHTML = Settings.sliceSize(); Screen.render()" id="slicesize" value="300" min="1" max="70">
+		<label id="slicesizelabel"></label><br>
+	
+		<label for="wcoord">W axis slice</label>
+		<input type="range" oninput="document.getElementById('wcoordlabel').innerHTML = Settings.wCoord(); Screen.render()" id="wcoord" value="35" min="0" max="69">
+		<label id="wcoordlabel"></label><br>
+	
 		<button type="button" onclick="changeColor()">Change Color</button><br>
-
 		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>
-
-		<canvas style="image-rendering: pixelated" id="antcanvas" width="1000" height="1000"></canvas>
+		<canvas style="image-rendering: pixelated" id="antcanvas" width="200" height="200">Browser doesn't support canvas</canvas>
 	</body>
 </html>

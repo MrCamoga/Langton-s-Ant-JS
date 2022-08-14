@@ -85,12 +85,10 @@ var Ant = (function() {
 	var map = new Array(width*height*depth);
 	var colors;
 	var turn;
-	var ruleString, size;
+	var size;
 	var iterations;
 	var time;
 	var states = new Array(PERIODBUFFERSIZE);
-	
-	var allowedmoves = [[13,10,17,22],[0,13,23,10,17,7,22]] // turn right left up down 90º,    no turn, right left up down 90º and 180º
 
 	function genColors() {
 		colors = new Array(size).fill(0).map(x=>(new Array(3).fill(0).map(y=>Math.floor(Math.random()*256))));
