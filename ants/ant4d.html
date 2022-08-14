@@ -21,6 +21,8 @@
 		<label id="itpflabel"></label><br>
 		<label for="fog">Draw depth fog</label>
 		<input type="checkbox" id="fog" checked="1" onclick="Screen.render()"><br>
+		<label for="rendercolor">Render color</label>
+		<input type="checkbox" id="rendercolor" checked="1" onclick="Screen.render()"><br>
 	
 		<label for="slice">Z axis slice</label>
 		<input type="range" oninput="document.getElementById('slicelabel').innerHTML = Settings.sliceDepth(); Screen.render()" id="slice" value="0" min="0" max="69">

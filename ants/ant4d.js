@@ -31,6 +31,7 @@ var Screen = (function() {
 			var fog = Settings.drawFog();
 			var sliceDepth = Settings.sliceDepth();
 			var sliceSize = Settings.sliceSize();
+			var rendercolor = Settings.renderColor();
 			var min = sliceDepth, max = Math.min(sliceDepth+sliceSize,size[2]);
 			var w = Settings.wCoord()*mul[3];
 			ctx.clearRect(0,0,size[0]*scale,size[1]*scale);
@@ -44,9 +45,9 @@ var Screen = (function() {
 					break;
 				}
 				var color = Ant.getColors(state);
-				data[i++] = color[0];
-				data[i++] = color[1];
-				data[i++] = color[2];
+				data[i++] = rendercolor?color[0]:0;
+				data[i++] = rendercolor?color[1]:0;
+				data[i++] = rendercolor?color[2]:0;
 				data[i++] = (!transparent)*(fog ? (1-(k-min)/(max-min))*255 : 255);
 			}
 			bufferctx.putImageData(img,0,0);
