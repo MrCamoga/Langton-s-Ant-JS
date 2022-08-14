@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<script type="text/javascript" src="../common.js"></script>
+		<script type="text/javascript" src="ant45deg.js"></script>
+		<title>45º Langton's Ant</title>
+	</head>
+	<body>
+		<label for="rule">Rule:</label>
+		<input type="number" id="rule" value="54787787">
+		<button onclick="init(BigInt(document.getElementById('rule').value))">Run</button>
+		<button onclick="init(BigInt(parseInt(Math.random()*10000000000)))">Random rule</button>
+		<p id="rulestring"></p>
+		<p id="iterations"></p>
+		<p id="itps"></p>
+		<p id="rendertime"></p>
+		<p id="period"></p>
+		<p id="highwaysize"></p>
+		<label for="itpf">Iterations per frame</label>
+		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
+		<label id="itpflabel"></label><br>
+
+		<button type="button" onclick="changeColor()">Change Color</button><br>
+
+		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>
+
+		<canvas style="image-rendering: pixelated" id="antcanvas" width="1000" height="1000"></canvas>
+	</body>
+</html>

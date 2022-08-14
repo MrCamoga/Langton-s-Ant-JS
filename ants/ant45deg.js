@@ -42,7 +42,7 @@ var Screen = (function() {
 
 var Ant = (function() {
 	var x, y, dir, index;
-	const directionx =[0,1,0,-1], directiony = [-1,0,1,0], directioni = [-width,1,width,-1];
+	const directionx =[0,1,1,1,0,-1,-1,-1], directiony = [-1,-1,0,1,1,1,0,-1], directioni = [-width,-width+1,1,width+1,width,width-1,-1,-width-1];
 	var map = new Array(width*height);
 	var colors;
 	var turn;
@@ -52,7 +52,13 @@ var Ant = (function() {
 	var states = new Array(PERIODBUFFERSIZE);
 	
 	function getDirs(rule) {
-		return rule.toString(2).split("").map(e=>[3,1][e]).reverse();
+		var array = [parseInt(rule%4n)+1];
+		rule = rule/4n;
+		while(rule!=0n) {
+			array.push(parseInt(rule%8n));
+			rule = rule/8n;
+		}
+		return array;
 	}
 
 	function genColors() {
@@ -67,7 +73,7 @@ var Ant = (function() {
 			dir = 0;
 			turn = getDirs(rule);
 			_rule = rule;
-			ruleString = turn.map(e=>" R L"[e]).join("");
+			ruleString = turn.map(e=>"FfRrBbLl"[e]).join("");
 			document.getElementById("rulestring").innerHTML = ruleString + " (" + rule + ")";
 			size = turn.length;
 			genColors();
@@ -78,24 +84,13 @@ var Ant = (function() {
 			var stop = false;
 			var startTime = performance.now();
 			for(var max = iterations + Settings.getItpf(); iterations < max;) {
-				// HORIZONTAL MOVEMENT
-				dir = (dir+turn[map[index]])&3;
+				dir = (dir+turn[map[index]])&7;
 				if(++map[index]==size) map[index] = 0;
 				states[iterations++%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
 				x += directionx[dir];
-				index += directioni[dir];
-				if(x < 0 || x >= width) {
-					stop = true;
-					break;
-				}
-				// VERTICAL MOVEMENT
-		                dir = (dir+turn[map[index]])&3;
-		                map[index]++;
-		                if(map[index]==size) map[index] = 0;
-		                states[(iterations++)%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
 				y += directiony[dir];
-		                index += directioni[dir];
-				if(y < 0 || y >= height) {
+				index += directioni[dir];
+				if(x < 0 || y < 0 || x >= width || y >= height) {
 					stop = true;
 					break;
 				}

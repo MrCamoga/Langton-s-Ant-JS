@@ -80,7 +80,6 @@ var Ant = (function() {
 
 	return {
 		init: function (rule) {
-			// have variable rule in main function
 			x = width/2;
 			y = height/2;
 			map.fill('0');
