@@ -50,7 +50,8 @@
 			</tbody>
 		</table>
 		<input type="button" onclick="init(readRuleTable());" value="Run turmite">
-		<input type="button" onclick="genRandomRule(24); init(readRuleTable());" value="Randomize"><br>
+		<input type="button" onclick="genRandomRule(24); init(readRuleTable());" value="Randomize">
+		<input type="button" onclick="navigator.clipboard.writeText(JSON.stringify(Ant.getRule()));" value="Copy Rule"><br>
 		<label for="itpf">Iterations per frame</label>
 		<input type="range" oninput="document.getElementById('itpflabel').innerHTML = Settings.getItpf();" id="itpf" value="96" min="0" max="100">
 		<label id="itpflabel"></label><br>
