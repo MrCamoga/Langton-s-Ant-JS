@@ -24,34 +24,33 @@ var Screen = (function() {
 			var sliceDepth = Settings.sliceDepth();
 			var sliceSize = Settings.sliceSize();
 			var angle = Settings.rotationAngle();
+			var rendercolor = Settings.renderColor();
 			var cos = Math.cos(angle), sin = Math.sin(angle);
 			var halfwidth = width/2, halfdepth = depth/2;
 			function rotate(x,z) { return [(x-halfwidth)*cos+(z-halfdepth)*sin+halfwidth,(z-halfdepth)*cos-(x-halfwidth)*sin+halfdepth]; }
 			var min = sliceDepth, max = Math.min(sliceDepth+sliceSize,depth);
-			for(var y=0, i=0; y < height;y++) {	
-				for(var x=0; x < width; x++) {
+			for(var y=0,yindex=0,i=4; y < height;y++,yindex+=mul[1],i+=4) {
+				for(var x=1; x < width; x++) {
 					var s = Math.sqrt(x*(width-x));
     					var x0 = rotate(x,halfdepth-s); // interpolation start point 
-					var x1 = rotate(x,halfdepth+s); // interpolation end point 
-					var d = Math.ceil(Math.sqrt((x0[0]-x1[0])**2+(x0[1]-x1[1])**2)); // num of pixels interpolation
-					min2 = Math.max(0,d*(min-halfdepth+s)/(2*s)); // variable of interpolation starting point
-					max2 = Math.min(d*(max-halfdepth+s)/(2*s),width); // variable of interpolation ending point
+					var x1 = rotate(x,halfdepth+s); // interpolation end point
+					var v = [(x1[0]-x0[0])/(2*s),(x1[1]-x0[1])/(2*s)];
+					var v2 = [v[0]*(s-halfdepth)+x0[0],v[1]*(s-halfdepth)+x0[1]];
 					var k, state = 0, transparent=true;
-					for(k = min2; k < max2; k++) { // slice through camera z axis
-						var xfinal = Math.floor((1-k/d)*x0[0]+k/d*x1[0]); 
-						var zfinal = Math.floor((1-k/d)*x0[1]+k/d*x1[1]); // x and z pixels on the map
+					for(k = min; k < max; k++) { // slice through camera z axis
+						var xfinal = Math.floor(v[0]*k+v2[0]);
+						var zfinal = Math.floor(v[1]*k+v2[1]);
 						if(xfinal < 0 || zfinal < 0 || xfinal >= width || zfinal >= depth) continue;
 						
-						var cell = zfinal*mul[2]+y*mul[1]+xfinal;
+						var cell = zfinal*mul[2]+yindex+xfinal;
 						if(Ant.getMap(cell) === "0") continue;
 						state = Ant.getMap(cell);
 						transparent = false;
-						k = halfdepth-s+2*s*k/d; // camera z coord (render fog)
 						break;
 					}
-					data[i++] = Ant.getColors(state)[0];
-					data[i++] = Ant.getColors(state)[1];
-					data[i++] = Ant.getColors(state)[2];
+					data[i++] = rendercolor*Ant.getColors(state)[0];
+					data[i++] = rendercolor*Ant.getColors(state)[1];
+					data[i++] = rendercolor*Ant.getColors(state)[2];
 					data[i++] = (!transparent)*(fog ? (1-(k-min)/(max-min))*255 : 255);
 				}
 			}
@@ -122,7 +121,7 @@ var Ant = (function() {
 			y = height/2;
 			z = depth/2;
 			map.fill("0");
-			dir = Math.floor(Math.random()*24);
+			dir = 0; //Math.floor(Math.random()*24)
 			turn = getDirs(rule);
 			_rule = rule;
 			ruleString = rule.toString(4).split("").map(e=>"RLUD"[e]).reverse().join("");
