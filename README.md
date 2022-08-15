@@ -18,6 +18,5 @@ Turmites allow turning in any of the 6, 24 and 192 orientations (2d, 3d and 4d r
 - chunk based map
 - backwards simulation to find period (for ants, turmites are not reversible in general)
 - save GIFs/videos
-- render 3d rotation (WIP)
 - store 3d and 4d rotation tables in files
 - higher dimensional ants (rotation table for 5d would be 1920x1920)

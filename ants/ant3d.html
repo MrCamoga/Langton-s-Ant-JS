@@ -21,6 +21,8 @@
 		<label id="itpflabel"></label><br>
 		<label for="fog">Draw depth fog</label>
 		<input type="checkbox" id="fog" checked="1" onclick="Screen.render()"><br>
+		<label for="rendercolor">Render color</label>
+		<input type="checkbox" id="rendercolor" checked="1" onclick="Screen.render()"><br>
 	
 		<label for="slice">Slice</label>
 		<input type="range" oninput="document.getElementById('slicelabel').innerHTML = Settings.sliceDepth(); Screen.render()" id="slice" value="0" min="0" max="299">
@@ -29,6 +31,10 @@
 		<label for="slicesize">Slice depth</label>
 		<input type="range" oninput="document.getElementById('slicesizelabel').innerHTML = Settings.sliceSize(); Screen.render()" id="slicesize" value="300" min="1" max="300">
 		<label id="slicesizelabel"></label><br>
+
+		<label for="rotation">Rotate</label>
+		<input type="range" oninput="document.getElementById('rotationlabel').innerHTML = Settings.rotationAngle().toFixed(2) + ' rad'; Screen.render()" id="rotation" value="0" min="-180" max="180">
+		<label id="rotationlabel"></label><br>
 	
 		<button type="button" onclick="changeColor()">Change Color</button><br>
 		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>

@@ -31,23 +31,42 @@ var Screen = (function() {
 			var fog = Settings.drawFog();
 			var sliceDepth = Settings.sliceDepth();
 			var sliceSize = Settings.sliceSize();
+			var angle = Settings.rotationAngle();
+			var w = Settings.wCoord();
+			var rendercolor = Settings.renderColor();
+			var cos = Math.cos(angle), sin = Math.sin(angle);
+			var halfwidth = size[3]/2, halfdepth = size[2]/2;
+			function rotate(w,z) { return [(w-halfwidth)*cos+(z-halfdepth)*sin+halfwidth,(z-halfdepth)*cos-(w-halfwidth)*sin+halfdepth]; }
 			var min = sliceDepth, max = Math.min(sliceDepth+sliceSize,size[2]);
-			var w = Settings.wCoord()*mul[3];
+			var range = max-min;
 			ctx.clearRect(0,0,size[0]*scale,size[1]*scale);
 			//ctx.beginPath(); ctx.rect(0,0,size[0]*scale,size[1]*scale); ctx.stroke();
-			for(var i = 0,j=0,len=mul[2]*4; i < len;j++) {
-				var k=min, state=0, transparent=true;
-				for(var cell=j+k*mul[2]+w; k < max; k++, cell += mul[2]) {
-					if(Ant.getMap(cell) === "0") continue;
-					state = Ant.getMap(cell);
-					transparent = false;
-					break;
+			for(var y=0,yindex=0,i=0; y < size[1];y++,yindex+=mul[1]) {
+				for(var x=0; x < size[0]; x++) {
+					var s = Math.sqrt(w*(size[3]-w));
+    					var x0 = rotate(w,halfdepth-s); // interpolation start point 
+					var x1 = rotate(w,halfdepth+s); // interpolation end point
+					var v = [(x1[0]-x0[0])/(2*s),(x1[1]-x0[1])/(2*s)]; // unit vector of interpolation
+					var k, state = 0, transparent = true;
+					var wfinalf = v[0]*(min+s-halfdepth)+x0[0];
+					var zfinalf = v[1]*(min+s-halfdepth)+x0[1];
+					for(k = 0; k < range; k++,wfinalf+=v[0],zfinalf+=v[1]) {
+						var wfinal = Math.floor(wfinalf);
+						var zfinal = Math.floor(zfinalf);
+
+						if(wfinal < 0 || zfinal < 0 || wfinal >= size[3] || zfinal >= size[2]) continue;
+						
+						var cell = wfinal*mul[3] + zfinal*mul[2]+yindex+x;
+						if(Ant.getMap(cell) === "0") continue;
+						state = Ant.getMap(cell);
+						transparent = false;
+						break;
+					}
+					data[i++] = rendercolor?Ant.getColors(state)[0]:0;
+					data[i++] = rendercolor?Ant.getColors(state)[1]:0;
+					data[i++] = rendercolor?Ant.getColors(state)[2]:0;
+					data[i++] = (!transparent)*(fog ? (1-k/range)*255 : 255);
 				}
-				var color = Ant.getColors(state);
-				data[i++] = color[0];
-				data[i++] = color[1];
-				data[i++] = color[2];
-				data[i++] = (!transparent)*(fog ? (1-(k-min)/(max-min))*255 : 255);
 			}
 			bufferctx.putImageData(img,0,0);
 			ctx.drawImage(buffer,0,0,size[0]*scale,size[1]*scale);

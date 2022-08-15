@@ -23,19 +23,39 @@ var Screen = (function() {
 			var fog = Settings.drawFog();
 			var sliceDepth = Settings.sliceDepth();
 			var sliceSize = Settings.sliceSize();
+			var angle = Settings.rotationAngle();
+			var rendercolor = Settings.renderColor();
+			var cos = Math.cos(angle), sin = Math.sin(angle);
+			var halfwidth = width/2, halfdepth = depth/2;
+			function rotate(x,z) { return [(x-halfwidth)*cos+(z-halfdepth)*sin+halfwidth,(z-halfdepth)*cos-(x-halfwidth)*sin+halfdepth]; }
 			var min = sliceDepth, max = Math.min(sliceDepth+sliceSize,depth);
-			for(var i = 0,j=0,len=mul[2]*4; i < len;j++) {
-				var k=min, state=0, transparent=true;
-				for(var cell=j+k*mul[2]; k < max; k++, cell += mul[2]) {
-					if(Ant.getMap(cell) === "0") continue;
-					state = Ant.getMap(cell);
-					transparent = false;
-					break;
+			var range = max-min;
+			for(var y=0,yindex=0,i=0; y < height;y++,yindex+=mul[1]) { i+=4;
+				for(var x=1; x < width; x++) {
+					var s = Math.sqrt(x*(width-x));
+    					var x0 = rotate(x,halfdepth-s); // interpolation start point 
+					var x1 = rotate(x,halfdepth+s); // interpolation end point
+					var v = [(x1[0]-x0[0])/(2*s),(x1[1]-x0[1])/(2*s)]; // unit vector of interpolation
+					var k, state = 0, transparent = true;
+					var xfinalf = v[0]*(min+s-halfdepth)+x0[0];
+					var zfinalf = v[1]*(min+s-halfdepth)+x0[1];
+					for(k = 0; k < range; k++,xfinalf+=v[0],zfinalf+=v[1]) {
+						var xfinal = Math.floor(xfinalf);
+						var zfinal = Math.floor(zfinalf);
+
+						if(xfinal < 0 || zfinal < 0 || xfinal >= width || zfinal >= depth) continue;
+						
+						var cell = zfinal*mul[2]+yindex+xfinal;
+						if(Ant.getMap(cell) === "0") continue;
+						state = Ant.getMap(cell);
+						transparent = false;
+						break;
+					}
+					data[i++] = rendercolor?Ant.getColors(state)[0]:0;
+					data[i++] = rendercolor?Ant.getColors(state)[1]:0;
+					data[i++] = rendercolor?Ant.getColors(state)[2]:0;
+					data[i++] = (!transparent)*(fog ? (1-k/range)*255 : 255);
 				}
-				data[i++] = Ant.getColors(state)[0];
-				data[i++] = Ant.getColors(state)[1];
-				data[i++] = Ant.getColors(state)[2];
-				data[i++] = (!transparent)*(fog ? (1-(k-min)/(max-min))*255:255);
 			}
 			ctx.putImageData(img,0,0);
 			var endTime = performance.now();
@@ -104,7 +124,7 @@ var Ant = (function() {
 			y = height/2;
 			z = depth/2;
 			map.fill("0");
-			dir = Math.floor(Math.random()*24);
+			dir = 0; //Math.floor(Math.random()*24)
 			turn = getDirs(rule);
 			_rule = rule;
 			ruleString = rule.toString(4).split("").map(e=>"RLUD"[e]).reverse().join("");
