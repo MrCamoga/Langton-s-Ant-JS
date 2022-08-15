@@ -35,6 +35,10 @@
 		<label for="wcoord">W axis slice</label>
 		<input type="range" oninput="document.getElementById('wcoordlabel').innerHTML = Settings.wCoord(); Screen.render()" id="wcoord" value="34" min="0" max="69">
 		<label id="wcoordlabel"></label><br>
+
+		<label for="rotation">Rotate ZW plane</label>
+		<input type="range" oninput="document.getElementById('rotationlabel').innerHTML = Settings.rotationAngle().toFixed(2) + ' rad'; Screen.render()" id="rotation" value="0" min="-180" max="180">
+		<label id="rotationlabel"></label><br>
 	
 		<button type="button" onclick="changeColor()">Change Color</button><br>
 		<a id="download"><button type="button" onclick="downloadImage()">Download image</button></a><br>
