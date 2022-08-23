@@ -1,4 +1,4 @@
-var width = 300, height = 300, depth = 300;
+var width = 1000, height = 1000, depth = 1000;
 var mul = [1,width,width*height];
 var PERIODBUFFERSIZE = 1000000;
 
@@ -46,7 +46,7 @@ var Screen = (function() {
 						if(xfinal < 0 || zfinal < 0 || xfinal >= width || zfinal >= depth) continue;
 						
 						var cell = zfinal*mul[2]+yindex+xfinal;
-						if(Ant.getMap(cell) === "0") continue;
+						if(Ant.getMap(cell) == 0) continue;
 						state = Ant.getMap(cell);
 						transparent = false;
 						break;
@@ -101,8 +101,9 @@ var Ant = (function() {
 			21,20,23,22,18,19,11,10,9,8,7,6,17,16,15,14,13,12,4,5,1,0,3,2,0,0,0,0,0,0,0,0,
 			22,23,19,18,21,20,16,17,13,12,15,14,5,4,3,2,1,0,11,10,9,8,7,6,0,0,0,0,0,0,0,0,
 			23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,0,0,0,0,0,0,0,0];
+	const inverse = [0, 1, 2, 4, 3, 5, 6, 7, 12, 18, 13, 19, 8, 10, 14, 20, 16, 22, 9, 11, 15, 21, 17, 23];
 
-	var map = new Array(width*height*depth);
+	var map = new Uint8Array(width*height*depth);
 	var colors;
 	var turn;
 	var _rule, ruleString, size;
@@ -123,24 +124,26 @@ var Ant = (function() {
 			x = width/2;
 			y = height/2;
 			z = depth/2;
-			map.fill("0");
+			map.fill(0);
 			dir = 0; //Math.floor(Math.random()*24)
 			turn = getDirs(rule);
 			_rule = rule;
 			ruleString = rule.toString(4).split("").map(e=>"RLUD"[e]).reverse().join("");
 			document.getElementById("rulestring").innerHTML = ruleString + " (" + rule + ")";
+			//document.getElementById("slice").max = depth-1;
+			//document.getElementById("slicesize").max = depth;
+			//document.getElementById("slicesize").value = depth;
 			size = turn.length;
 			genColors();
 			index = x+y*width+z*width*height;
 			iterations = 0, time = 0;
 		},
-		simulateAnt: function() {
+		simulateAnt: function(steps) {
 			var stop = false;
 			var startTime = performance.now();
-			for(var max = iterations + Settings.getItpf(); iterations < max; iterations++) {
+			for(var max = iterations + steps; iterations < max; iterations++) {
 				dir = transform[(turn[map[index]]<<5)|dir];
 		                if(++map[index]==size) map[index] = 0;
-				states[iterations%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
 				x += directionx[dir];
 		                y += directiony[dir];
 				z += directionz[dir];
@@ -153,6 +156,18 @@ var Ant = (function() {
 			var endTime = performance.now();
 			time += (endTime-startTime)/1000;
 			return !stop;	
+		},
+		simulateBackwards: function() {
+			for(var i = 0, it = iterations; it > 0 && i < PERIODBUFFERSIZE; i++, it--) {
+				index -= directioni[dir];
+				x -= directionx[dir];
+				y -= directiony[dir];
+				z -= directionz[dir];
+				states[i] = (map[index]<<8) | dir;
+				if(--map[index]<0) map[index] = size-1;
+				dir = transform[(inverse[turn[map[index]]]<<5)|dir];
+			}
+			return getPeriod(states);
 		},
 		getColors: function(i) { return colors[i]; },
 		getMap: function(i) { return map[i]; },

@@ -47,19 +47,18 @@ function init(rule) {
 }
 
 function loop(time) {
-	if(Ant.simulateAnt()) {
-		frameid = window.requestAnimationFrame(loop);
-	} else {
-		var v = Ant.getStates().slice(Ant.getIterations()%PERIODBUFFERSIZE).concat(Ant.getStates().slice(0,Ant.getIterations()%PERIODBUFFERSIZE)).reverse();
-		document.getElementById("period").innerHTML = "Finding period...";
-		var p = getPeriod(v);
+	var b = Ant.simulateAnt(Settings.getItpf());
+	Screen.render();
+	if(b) frameid = window.requestAnimationFrame(loop);
+	else {
+		var p = Ant.simulateBackwards();
 		if(p==-1) document.getElementById("period").innerHTML = "Period not found";
 		else {
 			document.getElementById("period").innerHTML = "Period: " + p[0];
 			document.getElementById("highwaysize").innerHTML = "Highway size: " + p[1].map(x=>Math.abs(x)).join("x");		
 		}
+		
 	}
-	Screen.render();
 }
 
 function changeColor() {

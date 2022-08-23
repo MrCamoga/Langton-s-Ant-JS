@@ -33,7 +33,7 @@ var Screen = (function() {
 				data[i++] = Ant.getColors(state)[0];
 				data[i++] = Ant.getColors(state)[1];
 				data[i++] = Ant.getColors(state)[2];
-				data[i++] = (state!=="0")*255;
+				data[i++] = 255;
 			}
 			bufferctx.putImageData(img,0,0);
 			ctx.drawImage(buffer,0,0);
@@ -56,7 +56,7 @@ var Ant = (function() {
 	const 	directionx =[0,1,1,0,-1,-1], 
 		directiony = [-1,-1,0,1,1,0],
 		directioni = [-width,-width+1,1,width,width-1,-1];
-	var map = new Array(width*height);
+	var map = new Uint8Array(width*height);
 	var colors;
 	var turn;
 	var _rule, ruleString, size;
@@ -93,16 +93,15 @@ var Ant = (function() {
 			index = x+y*width;
 			iterations = 0, time = 0;	
 		},
-		simulateAnt: function() {
+		simulateAnt: function(steps) {
 			var stop = false;
 			var startTime = performance.now();
-			for(var max = iterations + Settings.getItpf(); iterations < max; iterations++) {
+			for(var max = iterations + steps; iterations < max; iterations++) {
 		                dir = (dir+turn[map[index]])%6;
 		                if(++map[index]==size) map[index] = 0;
-		                states[iterations%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
-				x += directionx[dir];
+		                x += directionx[dir];
 				y += directiony[dir];
-		                index = x+y*width;
+		                index += directioni[dir];
 				if(x<0 || y < 0 || x >= width || y >= height) {
 					stop = true;
 					break;
@@ -111,6 +110,17 @@ var Ant = (function() {
 			var endTime = performance.now();
 			time += (endTime-startTime)/1000;
 			return !stop;
+		},
+		simulateBackwards: function() {
+			for(var i = 0, it = iterations; it > 0 && i < PERIODBUFFERSIZE; i++, it--) {
+			        index -= directioni[dir];
+		                x -= directionx[dir];
+				y -= directiony[dir];
+				states[i] = (map[index]<<8) | dir;
+		                if(--map[index]<0) map[index] = size-1;
+				dir = (dir+6-turn[map[index]])%6;
+			}
+			return getPeriod(states);
 		},
 		getColors: function(i) { return colors[i]; },
 		getMap: function(i) { return map[i]; },

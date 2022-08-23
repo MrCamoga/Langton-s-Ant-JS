@@ -24,7 +24,7 @@ var Screen = (function() {
 				data[i++] = Ant.getColors(state)[0];
 				data[i++] = Ant.getColors(state)[1];
 				data[i++] = Ant.getColors(state)[2];
-				data[i++] = (state!=="0")*255;
+				data[i++] = 255;
 			}
 			ctx.putImageData(img,0,0);
 			var endTime = performance.now();
@@ -42,8 +42,10 @@ var Screen = (function() {
 
 var Ant = (function() {
 	var x, y, dir, index;
-	const directionx =[0,1,0,-1], directiony = [-1,0,1,0], directioni = [-width,1,width,-1];
-	var map = new Array(width*height);
+	const 	directionx =[0,1,0,-1], 
+		directiony = [-1,0,1,0], 
+		directioni = [-width,1,width,-1];
+	var map = new Uint8Array(width*height);
 	var colors;
 	var turn;
 	var _rule, ruleString, size;
@@ -74,27 +76,26 @@ var Ant = (function() {
 			index = x+y*width;	
 			iterations = 0, time = 0;	
 		},
-		simulateAnt: function() {
+		simulateAnt: function(steps) {
 			var stop = false;
 			var startTime = performance.now();
-			for(var max = iterations + Settings.getItpf(); iterations < max;) {
+			for(var max = iterations + steps; iterations < max;) {
 				// HORIZONTAL MOVEMENT
 				dir = (dir+turn[map[index]])&3;
 				if(++map[index]==size) map[index] = 0;
-				states[iterations++%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
 				x += directionx[dir];
 				index += directioni[dir];
 				if(x < 0 || x >= width) {
 					stop = true;
+					iterations++;
 					break;
 				}
 				// VERTICAL MOVEMENT
 		                dir = (dir+turn[map[index]])&3;
-		                map[index]++;
-		                if(map[index]==size) map[index] = 0;
-		                states[(iterations++)%PERIODBUFFERSIZE] = (map[index]<<8) | dir;
+		                if(++map[index]==size) map[index] = 0;
 				y += directiony[dir];
 		                index += directioni[dir];
+				iterations += 2;
 				if(y < 0 || y >= height) {
 					stop = true;
 					break;
@@ -103,6 +104,17 @@ var Ant = (function() {
 			var endTime = performance.now();
 			time += (endTime-startTime)/1000;
 			return !stop;	
+		},
+		simulateBackwards: function() {
+			for(var i = 0, it = iterations; it > 0 && i < PERIODBUFFERSIZE; i++, it--) {
+				index -= directioni[dir];
+				x -= directionx[dir];
+				y -= directiony[dir];
+				states[i] = (map[index]<<8) | dir;
+				if(--map[index]<0) map[index] = size-1;
+				dir = (dir-turn[map[index]])&3;
+			}
+			return getPeriod(states);
 		},
 		getColors: function(i) { return colors[i]; },
 		getMap: function(i) { return map; },
